@@ -18,9 +18,10 @@ public class TestConfig implements CommandLineRunner {
     }
 
     @Override
-    public void run(String... args) throws Exception {
-
-        produtoRepository.deleteAll();
+    public void run(String... args) {
+        if (produtoRepository.count() > 0) {
+            return;
+        }
 
         Produto p1 = new Produto(
                 null, "Mouse", "PRD-001",
@@ -29,7 +30,7 @@ public class TestConfig implements CommandLineRunner {
 
         Produto p2 = new Produto(
                 null, "Teclado", "PRD-002",
-                new BigDecimal("89.90"), 5, 1
+                new BigDecimal("89.90"), 1, 2
         );
 
         produtoRepository.saveAll(Arrays.asList(p1, p2));
