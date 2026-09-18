@@ -15,7 +15,7 @@ public class Venda {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Instant momento;
-    private StatusVenda statusVenda;
+    private Integer statusVenda;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
@@ -27,10 +27,11 @@ public class Venda {
     public Venda() {
     }
 
-    public Venda(Long id, Instant momento, StatusVenda statusVenda) {
+    public Venda(Long id, Instant momento, Integer statusVenda, Cliente cliente) {
         this.id = id;
         this.momento = momento;
         this.statusVenda = statusVenda;
+        this.cliente = cliente;
     }
 
     public Long getId() {
@@ -50,11 +51,13 @@ public class Venda {
     }
 
     public StatusVenda getStatusVenda() {
-        return statusVenda;
+        return StatusVenda.valueOf(statusVenda);
     }
 
     public void setStatusVenda(StatusVenda statusVenda) {
-        this.statusVenda = statusVenda;
+        if(this.statusVenda != null) {
+            this.statusVenda = statusVenda.getCode();
+        }
     }
 
     public BigDecimal getTotal() {
@@ -65,6 +68,14 @@ public class Venda {
         }
 
         return soma;
+    }
+
+    public Cliente getCliente() {
+        return cliente;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
     }
 
     @Override
