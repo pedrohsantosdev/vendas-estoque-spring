@@ -6,6 +6,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
+import java.util.Objects;
+
 @Embeddable
 public class ItemVendaPK {
 
@@ -39,5 +41,17 @@ public class ItemVendaPK {
 
     public void setProduto(Produto produto) {
         this.produto = produto;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        ItemVendaPK that = (ItemVendaPK) o;
+        return Objects.equals(venda, that.venda) && Objects.equals(produto, that.produto);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(venda, produto);
     }
 }

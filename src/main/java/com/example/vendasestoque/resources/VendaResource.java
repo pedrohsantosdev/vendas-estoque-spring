@@ -23,20 +23,21 @@ public class VendaResource {
         return ResponseEntity.ok().body(list);
     }
 
+
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Venda> buscarVendaPorId(Long id) {
+    public ResponseEntity<Venda> buscarVendaPorId(@PathVariable Long id) {
         Venda obj = vendaService.buscarVendaPorId(id);
         return ResponseEntity.ok().body(obj);
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<Venda> cancelarVenda(Long id) {
+    public ResponseEntity<Venda> cancelarVenda(@PathVariable Long id) {
         Venda obj = vendaService.cancelarVenda(id);
         return ResponseEntity.ok().body(obj);
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity<Void> deletarVenda(Long id) {
+    public ResponseEntity<Void> deletarVenda(@PathVariable Long id) {
         vendaService.deletarVenda(id);
         return ResponseEntity.noContent().build();
     }
