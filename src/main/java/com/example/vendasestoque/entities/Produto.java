@@ -1,11 +1,10 @@
 package com.example.vendasestoque.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Produto {
@@ -18,6 +17,9 @@ public class Produto {
     private BigDecimal preco;
     private Integer quantidadeEstoque;
     private Integer estoqueMinimo;
+
+    @OneToMany(mappedBy = "id.produto")
+    private Set<ItemVenda> itens = new HashSet<>();
 
     public Produto() {
     }

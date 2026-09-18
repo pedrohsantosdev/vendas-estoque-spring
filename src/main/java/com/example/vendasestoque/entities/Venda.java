@@ -1,12 +1,12 @@
 package com.example.vendasestoque.entities;
 
 import com.example.vendasestoque.entities.enuns.StatusVenda;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 
+import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 public class Venda {
@@ -16,6 +16,13 @@ public class Venda {
     private Long id;
     private Instant momento;
     private StatusVenda statusVenda;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    @OneToMany(mappedBy = "id.venda")
+    private Set<ItemVenda> itens = new HashSet<>();
 
     public Venda() {
     }
@@ -50,16 +57,26 @@ public class Venda {
         this.statusVenda = statusVenda;
     }
 
+    public BigDecimal getTotal() {
+        BigDecimal soma = BigDecimal.ZERO;
+
+        for (ItemVenda item : itens) {
+            soma = soma.add(item.getSubTotal());
+        }
+
+        return soma;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (!(o instanceof Cliente outro)) return false;
+        if (!(o instanceof Venda outro)) return false;
 
         return getId() != null && getId().equals(outro.getId());
     }
 
     @Override
     public int hashCode() {
-        return Cliente.class.hashCode();
+        return Venda.class.hashCode();
     }
 }

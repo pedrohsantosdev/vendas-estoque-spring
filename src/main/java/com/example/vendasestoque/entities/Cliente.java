@@ -1,9 +1,9 @@
 package com.example.vendasestoque.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class Cliente {
@@ -14,6 +14,9 @@ public class Cliente {
     private String nome;
     private String email;
     private String telefone;
+
+    @OneToMany(mappedBy = "cliente")
+    private List<Venda> vendas = new ArrayList<>();
 
     public Cliente() {
     }
