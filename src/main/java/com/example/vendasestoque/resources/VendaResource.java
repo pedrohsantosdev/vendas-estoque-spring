@@ -1,5 +1,6 @@
 package com.example.vendasestoque.resources;
 
+import com.example.vendasestoque.dtos.VendaRequestDTO;
 import com.example.vendasestoque.entities.Venda;
 import com.example.vendasestoque.services.VendaService;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +24,15 @@ public class VendaResource {
         return ResponseEntity.ok().body(list);
     }
 
-
     @GetMapping(value = "/{id}")
     public ResponseEntity<Venda> buscarVendaPorId(@PathVariable Long id) {
         Venda obj = vendaService.buscarVendaPorId(id);
+        return ResponseEntity.ok().body(obj);
+    }
+
+    @PostMapping
+    public ResponseEntity<Venda> cadastrarVenda(@RequestBody VendaRequestDTO requestDTO) {
+        Venda obj = vendaService.cadastrarVenda(requestDTO);
         return ResponseEntity.ok().body(obj);
     }
 

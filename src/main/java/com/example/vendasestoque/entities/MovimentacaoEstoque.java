@@ -1,6 +1,7 @@
 package com.example.vendasestoque.entities;
 
 import com.example.vendasestoque.entities.enuns.TipoMovimentacao;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;

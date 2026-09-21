@@ -1,5 +1,6 @@
 package com.example.vendasestoque.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.util.ArrayList;
@@ -15,6 +16,7 @@ public class Cliente {
     private String email;
     private String telefone;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente")
     private List<Venda> vendas = new ArrayList<>();
 
@@ -58,6 +60,10 @@ public class Cliente {
 
     public void setTelefone(String telefone) {
         this.telefone = telefone;
+    }
+
+    public List<Venda> getVendas() {
+        return vendas;
     }
 
     @Override

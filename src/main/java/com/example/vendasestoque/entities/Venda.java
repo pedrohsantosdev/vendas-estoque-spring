@@ -1,5 +1,4 @@
 package com.example.vendasestoque.entities;
-
 import com.example.vendasestoque.entities.enuns.StatusVenda;
 import jakarta.persistence.*;
 

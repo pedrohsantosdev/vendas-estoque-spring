@@ -1,5 +1,6 @@
 package com.example.vendasestoque.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -20,9 +21,11 @@ public class Produto {
     private Integer quantidadeEstoque;
     private Integer estoqueMinimo;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "id.produto")
     private Set<ItemVenda> itens = new HashSet<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "produto")
     private List<MovimentacaoEstoque> movimentacoes = new ArrayList<>();
 
