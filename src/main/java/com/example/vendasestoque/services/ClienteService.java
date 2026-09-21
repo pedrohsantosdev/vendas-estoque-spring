@@ -32,7 +32,7 @@ public class ClienteService {
     public Cliente atualizarCliente(Long id, Cliente novoCliente) {
         Cliente clienteAtual = buscarClientePorId(id);
         modificarCliente(clienteAtual, novoCliente);
-        return clienteAtual;
+        return clienteRepository.save(clienteAtual);
     }
 
     public void deletarCliente(Long id) {

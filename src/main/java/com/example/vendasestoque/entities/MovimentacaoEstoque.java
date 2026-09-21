@@ -54,8 +54,6 @@ public class MovimentacaoEstoque {
         if(tipoMovimentacao != null) {
             this.tipoMovimentacao = tipoMovimentacao.getCode();
         }
-
-        throw new IllegalArgumentException("Código inválido");
     }
 
     public Integer getQuantidade() {

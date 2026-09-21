@@ -17,6 +17,7 @@ public class MovimentacaoEstoqueResource {
         this.movimentacaoEstoqueService = movimentacaoEstoqueService;
    }
 
+   @GetMapping
    public ResponseEntity<List<MovimentacaoEstoque>> listarMovimentacoes() {
        List<MovimentacaoEstoque> list = movimentacaoEstoqueService.listarMovimentacoes();
        return ResponseEntity.ok().body(list);

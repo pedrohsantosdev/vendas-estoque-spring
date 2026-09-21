@@ -33,7 +33,7 @@ public class VendaService {
     public Venda cancelarVenda(Long id) {
         Venda obj = buscarVendaPorId(id);
         obj.setStatusVenda(StatusVenda.CANCELADA);
-        return obj;
+        return vendaRepository.save(obj);
     }
 
     public void deletarVenda(Long id) {
