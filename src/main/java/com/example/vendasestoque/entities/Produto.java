@@ -3,7 +3,9 @@ package com.example.vendasestoque.entities;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -20,6 +22,10 @@ public class Produto {
 
     @OneToMany(mappedBy = "id.produto")
     private Set<ItemVenda> itens = new HashSet<>();
+
+    @OneToMany(mappedBy = "produto")
+    private List<MovimentacaoEstoque> movimentacoes = new ArrayList<>();
+
 
     public Produto() {
     }
@@ -79,6 +85,14 @@ public class Produto {
 
     public void setEstoqueMinimo(Integer estoqueMinimo) {
         this.estoqueMinimo = estoqueMinimo;
+    }
+
+    public Set<ItemVenda> getItens() {
+        return itens;
+    }
+
+    public List<MovimentacaoEstoque> getMovimentacoes() {
+        return movimentacoes;
     }
 
     @Override
