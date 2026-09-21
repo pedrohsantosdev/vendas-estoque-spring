@@ -2,7 +2,9 @@ package com.example.vendasestoque.services;
 
 import com.example.vendasestoque.entities.Produto;
 import com.example.vendasestoque.repositories.ProdutoRepository;
+import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +24,7 @@ public class ProdutoService {
 
     public Produto buscarProdutoPorId(Long id) {
         Optional<Produto> obj = produtoRepository.findById(id);
-        return obj.get();
+        return obj.orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
     public Produto buscarProdutoPorCodigo(String codigo) {
@@ -33,12 +35,14 @@ public class ProdutoService {
         return produtoRepository.save(obj);
     }
 
+    @Transactional
     public Produto atualizarProduto(Long id, Produto novoProduto) {
         Produto produtoAtual = buscarProdutoPorId(id);
         modificarProduto(produtoAtual, novoProduto);
         return produtoRepository.save(produtoAtual);
     }
 
+    @Transactional
     public void deletarProduto(Long id) {
         Produto obj = buscarProdutoPorId(id);
         produtoRepository.delete(obj);

@@ -2,7 +2,9 @@ package com.example.vendasestoque.services;
 
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.repositories.MovimentacaoEstoqueRepository;
+import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,13 +24,14 @@ public class MovimentacaoEstoqueService {
 
     public MovimentacaoEstoque buscarMovimentacaoPorId(Long id) {
         Optional<MovimentacaoEstoque> obj = movimentacaoEstoqueRepository.findById(id);
-        return obj.get();
+        return obj.orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
     public MovimentacaoEstoque cadastrarMovimentacao(MovimentacaoEstoque movimentacaoEstoque) {
         return movimentacaoEstoqueRepository.save(movimentacaoEstoque);
     }
 
+    @Transactional
     public MovimentacaoEstoque atualizarMovimentacao(Long id, MovimentacaoEstoque novaMovimentacao) {
         MovimentacaoEstoque movimentacaoAtual = buscarMovimentacaoPorId(id);
         modificarMovimentacao(movimentacaoAtual, novaMovimentacao);
