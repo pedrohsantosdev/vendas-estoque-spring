@@ -29,6 +29,12 @@ public class ProdutoService {
     }
 
     public Produto buscarProdutoPorCodigo(String codigo) {
+        Produto obj = produtoRepository.findByCodigo(codigo);
+
+        if(obj == null) {
+            throw new ResourceNotFoundException(codigo);
+        }
+
         return produtoRepository.findByCodigo(codigo);
     }
 
