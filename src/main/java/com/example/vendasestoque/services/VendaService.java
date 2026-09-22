@@ -69,7 +69,27 @@ public class VendaService {
     @Transactional
     public Venda cancelarVenda(Long id) {
         Venda obj = buscarVendaPorId(id);
+
+        if(obj.getStatusVenda() == StatusVenda.CANCELADA) {
+            return obj;
+        }
+
+        for(ItemVenda item : obj.getItens()) {
+
+            Produto produto = item.getId().getProduto();
+
+            MovimentacaoEstoque movimentacaoEstoque = new MovimentacaoEstoque(
+                    null, TipoMovimentacao.ENTRADA, item.getQuantidade(), Instant.now(),
+                    "Cancelamento da venda " + obj.getId(),
+                    produto, obj
+            );
+
+            movimentacaoEstoqueService.cadastrarMovimentacao(movimentacaoEstoque);
+
+        }
+
         obj.setStatusVenda(StatusVenda.CANCELADA);
+
         return vendaRepository.save(obj);
     }
 

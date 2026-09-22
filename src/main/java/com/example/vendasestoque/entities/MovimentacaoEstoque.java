@@ -17,10 +17,12 @@ public class MovimentacaoEstoque {
     private Instant momento;
     private String motivo;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "produto_id")
     private Produto produto;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "venda_id")
     private Venda venda;
