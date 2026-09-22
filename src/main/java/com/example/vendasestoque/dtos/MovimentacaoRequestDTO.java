@@ -11,8 +11,7 @@ public record MovimentacaoRequestDTO(
         @Positive(message = "Campo não pode ser negativo")
         Long produtoId,
 
-        @NotNull(message = "Campo não pode ser nulo")
-        @Positive(message = "Campo não pode ser negativo")
+        @NotNull(message = "O tipo da movimentação é obrigatório")
         TipoMovimentacao tipoMovimentacao,
 
         @NotNull(message = "Campo não pode ser nulo")
@@ -21,7 +20,5 @@ public record MovimentacaoRequestDTO(
 
         @NotBlank(message = "Campo não pode ser vazio")
         String motivo
-
-
 ) {
 }

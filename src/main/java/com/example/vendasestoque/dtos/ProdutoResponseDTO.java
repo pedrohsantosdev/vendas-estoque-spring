@@ -10,7 +10,8 @@ public record ProdutoResponseDTO(
         String codigo,
         BigDecimal preco,
         Integer quantidadeEstoque,
-        Integer estoqueMinimo
+        Integer estoqueMinimo,
+        boolean estoqueBaixo
 ) {
 
     public ProdutoResponseDTO(Produto produto) {
@@ -20,7 +21,8 @@ public record ProdutoResponseDTO(
                 produto.getCodigo(),
                 produto.getPreco(),
                 produto.getQuantidadeEstoque(),
-                produto.getEstoqueMinimo()
+                produto.getEstoqueMinimo(),
+                produto.estoqueBaixo()
         );
     }
 }

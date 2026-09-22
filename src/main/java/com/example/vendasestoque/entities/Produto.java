@@ -98,6 +98,10 @@ public class Produto {
         return movimentacoes;
     }
 
+    public boolean estoqueBaixo() {
+        return quantidadeEstoque <= estoqueMinimo;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;

@@ -1,13 +1,14 @@
 package com.example.vendasestoque.dtos;
 
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
+import com.example.vendasestoque.entities.enuns.TipoMovimentacao;
 
 import java.time.Instant;
 
 public record MovimentacaoResponseDTO(
 
         Long id,
-        Integer tipoMovimentacao,
+        TipoMovimentacao tipoMovimentacao,
         Integer quantidade,
         Instant momento,
         String motivo,
@@ -18,12 +19,22 @@ public record MovimentacaoResponseDTO(
     public MovimentacaoResponseDTO(MovimentacaoEstoque movimentacaoEstoque) {
         this(
                 movimentacaoEstoque.getId(),
-                movimentacaoEstoque.getTipoMovimentacao().getCode(),
+                movimentacaoEstoque.getTipoMovimentacao(),
                 movimentacaoEstoque.getQuantidade(),
                 movimentacaoEstoque.getMomento(),
                 movimentacaoEstoque.getMotivo(),
                 movimentacaoEstoque.getProduto().getId(),
-                movimentacaoEstoque.getVenda().getId()
+                obterVenda(movimentacaoEstoque)
         );
+    }
+
+    private static Long obterVenda(MovimentacaoEstoque movimentacaoEstoque) {
+
+        if(movimentacaoEstoque.getVenda() == null) {
+            return null;
+        }
+
+        return movimentacaoEstoque.getVenda().getId();
+
     }
 }
