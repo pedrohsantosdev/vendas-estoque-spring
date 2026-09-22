@@ -17,7 +17,6 @@ public class ItemVendaPK {
     @JoinColumn(name = "venda_id")
     private Venda venda;
 
-    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "produto_id")
     private Produto produto;

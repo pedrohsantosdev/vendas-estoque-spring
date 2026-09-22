@@ -1,8 +1,10 @@
 package com.example.vendasestoque.resources;
 
 import com.example.vendasestoque.dtos.VendaRequestDTO;
+import com.example.vendasestoque.dtos.VendaResponseDTO;
 import com.example.vendasestoque.entities.Venda;
 import com.example.vendasestoque.services.VendaService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -21,19 +23,20 @@ public class VendaResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<Venda>> listarVendas() {
+    public ResponseEntity<List<VendaResponseDTO>> listarVendas() {
         List<Venda> list = vendaService.listarVendas();
-        return ResponseEntity.ok().body(list);
+        List<VendaResponseDTO> vendas = list.stream().map(venda -> new VendaResponseDTO(venda)).toList();
+        return ResponseEntity.ok().body(vendas);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Venda> buscarVendaPorId(@PathVariable Long id) {
+    public ResponseEntity<VendaResponseDTO> buscarVendaPorId(@PathVariable Long id) {
         Venda obj = vendaService.buscarVendaPorId(id);
-        return ResponseEntity.ok().body(obj);
+        return ResponseEntity.ok().body(new VendaResponseDTO(obj));
     }
 
     @PostMapping
-    public ResponseEntity<Venda> cadastrarVenda(@RequestBody VendaRequestDTO requestDTO) {
+    public ResponseEntity<VendaResponseDTO> cadastrarVenda(@Valid @RequestBody VendaRequestDTO requestDTO) {
         Venda obj = vendaService.cadastrarVenda(requestDTO);
 
         URI uri = ServletUriComponentsBuilder
@@ -42,13 +45,13 @@ public class VendaResource {
                 .buildAndExpand(obj.getId())
                 .toUri();
 
-        return ResponseEntity.created(uri).body(obj);
+        return ResponseEntity.created(uri).body(new VendaResponseDTO(obj));
     }
 
     @PatchMapping(value = "/{id}")
-    public ResponseEntity<Venda> cancelarVenda(@PathVariable Long id) {
+    public ResponseEntity<VendaResponseDTO> cancelarVenda(@PathVariable Long id) {
         Venda obj = vendaService.cancelarVenda(id);
-        return ResponseEntity.ok().body(obj);
+        return ResponseEntity.ok().body(new VendaResponseDTO(obj));
     }
 
     @DeleteMapping(value = "/{id}")
