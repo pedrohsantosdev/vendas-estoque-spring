@@ -1,7 +1,10 @@
 package com.example.vendasestoque.resources;
 
+import com.example.vendasestoque.dtos.MovimentacaoRequestDTO;
+import com.example.vendasestoque.dtos.MovimentacaoResponseDTO;
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.services.MovimentacaoEstoqueService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,33 +23,35 @@ public class MovimentacaoEstoqueResource {
    }
 
    @GetMapping
-   public ResponseEntity<List<MovimentacaoEstoque>> listarMovimentacoes() {
+   public ResponseEntity<List<MovimentacaoResponseDTO>> listarMovimentacoes() {
        List<MovimentacaoEstoque> list = movimentacaoEstoqueService.listarMovimentacoes();
-       return ResponseEntity.ok().body(list);
+       List<MovimentacaoResponseDTO> movimentacoes = list.stream().
+               map(movimentacaoEstoque -> new MovimentacaoResponseDTO(movimentacaoEstoque)).toList();
+       return ResponseEntity.ok().body(movimentacoes);
    }
 
    @GetMapping(value = "/{id}")
-   public ResponseEntity<MovimentacaoEstoque> buscarMovimentacaoPorId(@PathVariable Long id) {
+   public ResponseEntity<MovimentacaoResponseDTO> buscarMovimentacaoPorId(@PathVariable Long id) {
        MovimentacaoEstoque obj = movimentacaoEstoqueService.buscarMovimentacaoPorId(id);
-       return ResponseEntity.ok().body(obj);
+       return ResponseEntity.ok().body(new MovimentacaoResponseDTO(obj));
    }
 
    @PostMapping
-   public ResponseEntity<MovimentacaoEstoque> cadastrarMovimentacao(@RequestBody MovimentacaoEstoque obj) {
-       obj = movimentacaoEstoqueService.cadastrarMovimentacao(obj);
+   public ResponseEntity<MovimentacaoResponseDTO> cadastrarMovimentacao(@Valid @RequestBody MovimentacaoRequestDTO requestDTO) {
+       MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueService.cadastrarMovimentacao(requestDTO);
 
        URI uri = ServletUriComponentsBuilder
                .fromCurrentRequest()
                .path("/{id}")
-               .buildAndExpand(obj.getId())
+               .buildAndExpand(movimentacaoEstoque.getId())
                .toUri();
 
-       return ResponseEntity.created(uri).body(obj);
+       return ResponseEntity.created(uri).body(new MovimentacaoResponseDTO(movimentacaoEstoque));
    }
 
    @PatchMapping(value = "/{id}")
-   public ResponseEntity<MovimentacaoEstoque> atualizarMovimentacao(@PathVariable Long id, @RequestBody MovimentacaoEstoque obj) {
-       obj = movimentacaoEstoqueService.atualizarMovimentacao(id, obj);
-       return ResponseEntity.ok().body(obj);
+   public ResponseEntity<MovimentacaoResponseDTO> atualizarMovimentacao(@PathVariable Long id, @Valid @RequestBody MovimentacaoRequestDTO requestDTO) {
+       MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueService.atualizarMovimentacao(id, requestDTO);
+       return ResponseEntity.ok().body(new MovimentacaoResponseDTO(movimentacaoEstoque));
    }
 }

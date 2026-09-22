@@ -1,5 +1,6 @@
 package com.example.vendasestoque.services;
 
+import com.example.vendasestoque.dtos.MovimentacaoRequestDTO;
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.entities.Produto;
 import com.example.vendasestoque.repositories.MovimentacaoEstoqueRepository;
@@ -8,6 +9,7 @@ import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,6 +33,7 @@ public class MovimentacaoEstoqueService {
         return obj.orElseThrow(() -> new ResourceNotFoundException(id));
     }
 
+    //Venda ou cancelamento
     @Transactional
     public MovimentacaoEstoque cadastrarMovimentacao(MovimentacaoEstoque movimentacaoEstoque) {
 
@@ -58,15 +61,34 @@ public class MovimentacaoEstoqueService {
         return movimentacaoEstoqueRepository.save(movimentacaoEstoque);
     }
 
+    //Requisição de reposição
     @Transactional
-    public MovimentacaoEstoque atualizarMovimentacao(Long id, MovimentacaoEstoque novaMovimentacao) {
+    public MovimentacaoEstoque cadastrarMovimentacao(MovimentacaoRequestDTO requestDTO) {
+
+        Produto produto = produtoService.buscarProdutoPorId(requestDTO.produtoId());
+
+        MovimentacaoEstoque movimentacaoEstoque = new MovimentacaoEstoque(
+                null,
+                requestDTO.tipoMovimentacao(),
+                requestDTO.quantidade(),
+                Instant.now(),
+                requestDTO.motivo(),
+                produto,
+                null
+        );
+
+        return cadastrarMovimentacao(movimentacaoEstoque);
+    }
+
+    @Transactional
+    public MovimentacaoEstoque atualizarMovimentacao(Long id, MovimentacaoRequestDTO requestDTO) {
         MovimentacaoEstoque movimentacaoAtual = buscarMovimentacaoPorId(id);
-        modificarMovimentacao(movimentacaoAtual, novaMovimentacao);
+        modificarMovimentacao(movimentacaoAtual, requestDTO);
         return movimentacaoEstoqueRepository.save(movimentacaoAtual);
     }
 
-    private void modificarMovimentacao(MovimentacaoEstoque movimentacaoAtual, MovimentacaoEstoque novaMovimentacao) {
-        movimentacaoAtual.setMotivo(novaMovimentacao.getMotivo());
+    private void modificarMovimentacao(MovimentacaoEstoque movimentacaoAtual, MovimentacaoRequestDTO requestDTO) {
+        movimentacaoAtual.setMotivo(requestDTO.motivo());
     }
 
     private void inserirEstoque(Produto produto, Integer quantidade) {
@@ -80,7 +102,7 @@ public class MovimentacaoEstoqueService {
     }
 
     private void validarSaidaDeEstoque(MovimentacaoEstoque movimentacaoEstoque, Produto produto) {
-        if(movimentacaoEstoque.getQuantidade() > produto.getQuantidadeEstoque() ) {
+        if( movimentacaoEstoque.getQuantidade() > produto.getQuantidadeEstoque() ) {
             throw new EstoqueInsuficiente("Estoque do produto insufiente: " + produto.getNome());
         }
     }
