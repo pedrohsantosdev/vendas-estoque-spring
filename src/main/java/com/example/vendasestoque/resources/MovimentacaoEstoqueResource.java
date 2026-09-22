@@ -4,7 +4,9 @@ import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.services.MovimentacaoEstoqueService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -32,7 +34,14 @@ public class MovimentacaoEstoqueResource {
    @PostMapping
    public ResponseEntity<MovimentacaoEstoque> cadastrarMovimentacao(@RequestBody MovimentacaoEstoque obj) {
        obj = movimentacaoEstoqueService.cadastrarMovimentacao(obj);
-       return ResponseEntity.ok().body(obj);
+
+       URI uri = ServletUriComponentsBuilder
+               .fromCurrentRequest()
+               .path("/{id}")
+               .buildAndExpand(obj.getId())
+               .toUri();
+
+       return ResponseEntity.created(uri).body(obj);
    }
 
    @PatchMapping(value = "/{id}")

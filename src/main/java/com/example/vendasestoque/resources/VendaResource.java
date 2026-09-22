@@ -5,7 +5,9 @@ import com.example.vendasestoque.entities.Venda;
 import com.example.vendasestoque.services.VendaService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -33,7 +35,14 @@ public class VendaResource {
     @PostMapping
     public ResponseEntity<Venda> cadastrarVenda(@RequestBody VendaRequestDTO requestDTO) {
         Venda obj = vendaService.cadastrarVenda(requestDTO);
-        return ResponseEntity.ok().body(obj);
+
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(obj.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(obj);
     }
 
     @PatchMapping(value = "/{id}")

@@ -4,7 +4,9 @@ import com.example.vendasestoque.entities.Cliente;
 import com.example.vendasestoque.services.ClienteService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -32,7 +34,14 @@ public class ClienteResource {
     @PostMapping
     public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente obj) {
         obj = clienteService.cadastrarCliente(obj);
-        return ResponseEntity.ok().body(obj);
+
+        URI uri = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(obj.getId())
+                .toUri();
+
+        return ResponseEntity.created(uri).body(obj);
     }
 
     @PutMapping(value = "/{id}")
