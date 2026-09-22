@@ -42,6 +42,16 @@ public class ProdutoResource {
         return ResponseEntity.ok().body(new ProdutoResponseDTO(obj));
     }
 
+    @GetMapping(value = "/baixoestoque")
+    public ResponseEntity<List<ProdutoResponseDTO>> buscarProdutosComBaixoEstoque() {
+
+        List<Produto> list = produtoService.buscarProdutosComEstoqueBaixo();
+        List<ProdutoResponseDTO> produtos = list.stream()
+                .map(produto -> new ProdutoResponseDTO(produto)).toList();
+
+        return ResponseEntity.ok().body(produtos);
+    }
+
     @PostMapping
     public ResponseEntity<ProdutoResponseDTO> cadastrarProduto(@Valid @RequestBody ProdutoRequestDTO requestDTO) {
         Produto produto = produtoService.cadastrarProduto(requestDTO);

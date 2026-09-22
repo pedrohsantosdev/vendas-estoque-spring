@@ -38,6 +38,10 @@ public class ProdutoService {
         return produtoRepository.findByCodigo(codigo);
     }
 
+    public List<Produto> buscarProdutosComEstoqueBaixo() {
+        return produtoRepository.findProdutosAbaixoDoEstoqueMinimo();
+    }
+
     public Produto cadastrarProduto(ProdutoRequestDTO requestDTO) {
 
         if(produtoRepository.existsByCodigo(requestDTO.codigo())) {
