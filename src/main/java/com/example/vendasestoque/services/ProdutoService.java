@@ -1,5 +1,6 @@
 package com.example.vendasestoque.services;
 
+import com.example.vendasestoque.dtos.ProdutoRequestDTO;
 import com.example.vendasestoque.entities.Produto;
 import com.example.vendasestoque.repositories.ProdutoRepository;
 import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
@@ -31,14 +32,24 @@ public class ProdutoService {
         return produtoRepository.findByCodigo(codigo);
     }
 
-    public Produto cadastrarProduto(Produto obj) {
-        return produtoRepository.save(obj);
+    public Produto cadastrarProduto(ProdutoRequestDTO requestDTO) {
+
+        if(produtoRepository.existsByCodigo(requestDTO.codigo())) {
+            throw new IllegalArgumentException("Código já existe");
+        }
+
+        Produto produto = new Produto(
+                null, requestDTO.nome(), requestDTO.codigo(),
+                requestDTO.preco(), 0, requestDTO.estoqueMinimo()
+        );
+
+        return produtoRepository.save(produto);
     }
 
     @Transactional
-    public Produto atualizarProduto(Long id, Produto novoProduto) {
+    public Produto atualizarProduto(Long id, ProdutoRequestDTO requestDTO) {
         Produto produtoAtual = buscarProdutoPorId(id);
-        modificarProduto(produtoAtual, novoProduto);
+        modificarProduto(produtoAtual, requestDTO);
         return produtoRepository.save(produtoAtual);
     }
 
@@ -48,10 +59,10 @@ public class ProdutoService {
         produtoRepository.delete(obj);
     }
 
-    private void modificarProduto(Produto produtoAtual, Produto novoProduto) {
-        produtoAtual.setNome(novoProduto.getNome());
-        produtoAtual.setCodigo(novoProduto.getCodigo());
-        produtoAtual.setPreco(novoProduto.getPreco());
-        produtoAtual.setEstoqueMinimo(novoProduto.getEstoqueMinimo());
+    private void modificarProduto(Produto produtoAtual, ProdutoRequestDTO requestDTO) {
+        produtoAtual.setNome(requestDTO.nome());
+        produtoAtual.setCodigo(requestDTO.codigo());
+        produtoAtual.setPreco(requestDTO.preco());
+        produtoAtual.setEstoqueMinimo(requestDTO.estoqueMinimo());
     }
 }

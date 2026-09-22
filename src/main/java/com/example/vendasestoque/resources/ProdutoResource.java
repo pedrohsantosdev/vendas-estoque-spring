@@ -1,7 +1,10 @@
 package com.example.vendasestoque.resources;
 
+import com.example.vendasestoque.dtos.ProdutoRequestDTO;
+import com.example.vendasestoque.dtos.ProdutoResponseDTO;
 import com.example.vendasestoque.entities.Produto;
 import com.example.vendasestoque.services.ProdutoService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,40 +23,42 @@ public class ProdutoResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<Produto>> listarProdutos() {
+    public ResponseEntity<List<ProdutoResponseDTO>> listarProdutos() {
         List<Produto> list = produtoService.listarProdutos();
-        return ResponseEntity.ok().body(list);
+        List<ProdutoResponseDTO> produtos = list.stream().
+                map(produto -> new ProdutoResponseDTO(produto)).toList();
+        return ResponseEntity.ok().body(produtos);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Produto> buscarProdutoPorId(@PathVariable Long id) {
+    public ResponseEntity<ProdutoResponseDTO> buscarProdutoPorId(@PathVariable Long id) {
         Produto obj = produtoService.buscarProdutoPorId(id);
-        return ResponseEntity.ok().body(obj);
+        return ResponseEntity.ok().body(new ProdutoResponseDTO(obj));
     }
 
     @GetMapping(value = "/codigo")
-    public ResponseEntity<Produto> buscarProdutoPorCodigo(@RequestParam(name = "numerobarra") String codigo) {
+    public ResponseEntity<ProdutoResponseDTO> buscarProdutoPorCodigo(@RequestParam(name = "numerobarra") String codigo) {
         Produto obj = produtoService.buscarProdutoPorCodigo(codigo);
-        return ResponseEntity.ok().body(obj);
+        return ResponseEntity.ok().body(new ProdutoResponseDTO(obj));
     }
 
     @PostMapping
-    public ResponseEntity<Produto> cadastrarProduto(@RequestBody Produto obj) {
-        obj = produtoService.cadastrarProduto(obj);
+    public ResponseEntity<ProdutoResponseDTO> cadastrarProduto(@Valid @RequestBody ProdutoRequestDTO requestDTO) {
+        Produto produto = produtoService.cadastrarProduto(requestDTO);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(obj.getId())
+                .buildAndExpand(produto.getId())
                 .toUri();
 
-        return ResponseEntity.created(uri).body(obj);
+        return ResponseEntity.created(uri).body(new ProdutoResponseDTO(produto));
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Produto> atualizarProduto(@PathVariable Long id, @RequestBody Produto obj) {
-        obj = produtoService.atualizarProduto(id, obj);
-        return ResponseEntity.ok().body(obj);
+    public ResponseEntity<ProdutoResponseDTO> atualizarProduto(@PathVariable Long id, @Valid @RequestBody ProdutoRequestDTO requestDTO) {
+        Produto produto = produtoService.atualizarProduto(id, requestDTO);
+        return ResponseEntity.ok().body(new ProdutoResponseDTO(produto));
     }
 
     @DeleteMapping(value = "/{id}")
