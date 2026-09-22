@@ -1,7 +1,10 @@
 package com.example.vendasestoque.resources;
 
+import com.example.vendasestoque.dtos.ClienteRequestDTO;
+import com.example.vendasestoque.dtos.ClienteResponseDTO;
 import com.example.vendasestoque.entities.Cliente;
 import com.example.vendasestoque.services.ClienteService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -20,34 +23,35 @@ public class ClienteResource {
     }
 
     @GetMapping
-    public ResponseEntity<List<Cliente>> listarClientes() {
+    public ResponseEntity<List<ClienteResponseDTO>> listarClientes() {
         List<Cliente> list = clienteService.listarClientes();
-        return ResponseEntity.ok().body(list);
+        List<ClienteResponseDTO> clientes = list.stream().map(cliente -> new ClienteResponseDTO(cliente)).toList();
+        return ResponseEntity.ok().body(clientes);
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity<Cliente> buscarClientePorId(@PathVariable Long id) {
+    public ResponseEntity<ClienteResponseDTO> buscarClientePorId(@PathVariable Long id) {
         Cliente obj = clienteService.buscarClientePorId(id);
-        return ResponseEntity.ok().body(obj);
+        return ResponseEntity.ok().body(new ClienteResponseDTO(obj));
     }
 
     @PostMapping
-    public ResponseEntity<Cliente> cadastrarCliente(@RequestBody Cliente obj) {
-        obj = clienteService.cadastrarCliente(obj);
+    public ResponseEntity<ClienteResponseDTO> cadastrarCliente(@Valid @RequestBody ClienteRequestDTO clienteRequestDTO) {
+        Cliente cliente = clienteService.cadastrarCliente(clienteRequestDTO);
 
         URI uri = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(obj.getId())
+                .buildAndExpand(cliente.getId())
                 .toUri();
 
-        return ResponseEntity.created(uri).body(obj);
+        return ResponseEntity.created(uri).body(new ClienteResponseDTO(cliente));
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity<Cliente> atualizarCliente(@PathVariable Long id, @RequestBody Cliente obj) {
-        obj = clienteService.atualizarCliente(id, obj);
-        return ResponseEntity.ok().body(obj);
+    public ResponseEntity<ClienteResponseDTO> atualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequestDTO requestDTO) {
+        Cliente cliente = clienteService.atualizarCliente(id, requestDTO);
+        return ResponseEntity.ok().body(new ClienteResponseDTO(cliente));
     }
 
     @DeleteMapping(value = "/{id}")
