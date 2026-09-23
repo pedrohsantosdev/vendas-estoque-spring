@@ -1,5 +1,6 @@
 package com.example.vendasestoque.dtos;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -13,6 +14,7 @@ public record VendaRequestDTO(
         Long clienteId,
 
         @NotEmpty(message = "Lista não pode ser vazia")
+        @Valid
         List<ItemVendaRequestDTO> itens
 ) {
 }

@@ -3,6 +3,7 @@ package com.example.vendasestoque.services;
 import com.example.vendasestoque.dtos.ProdutoRequestDTO;
 import com.example.vendasestoque.entities.Produto;
 import com.example.vendasestoque.repositories.ProdutoRepository;
+import com.example.vendasestoque.services.exceptions.CodigoExistente;
 import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +46,7 @@ public class ProdutoService {
     public Produto cadastrarProduto(ProdutoRequestDTO requestDTO) {
 
         if(produtoRepository.existsByCodigo(requestDTO.codigo())) {
-            throw new IllegalArgumentException("Código já existe");
+            throw new CodigoExistente("Código já existe");
         }
 
         Produto produto = new Produto(

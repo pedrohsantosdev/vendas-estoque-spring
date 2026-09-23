@@ -1,5 +1,6 @@
 package com.example.vendasestoque.resources.exceptions;
 
+import com.example.vendasestoque.services.exceptions.CodigoExistente;
 import com.example.vendasestoque.services.exceptions.EstoqueInsuficiente;
 import com.example.vendasestoque.services.exceptions.ItemRepetidoNaCompra;
 import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
@@ -59,6 +60,19 @@ public class ResourceExceptionHandler {
 
         String error = "Produtos inválidos";
         HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StandardError err = new StandardError(
+                Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI()
+        );
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(CodigoExistente.class)
+    public ResponseEntity<StandardError> codigoExistente(CodigoExistente e, HttpServletRequest request) {
+
+        String error = "Código inválido";
+        HttpStatus status = HttpStatus.CONFLICT;
 
         StandardError err = new StandardError(
                 Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI()
