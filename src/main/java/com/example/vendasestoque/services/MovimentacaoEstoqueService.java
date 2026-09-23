@@ -1,6 +1,7 @@
 package com.example.vendasestoque.services;
 
 import com.example.vendasestoque.dtos.MovimentacaoRequestDTO;
+import com.example.vendasestoque.dtos.MovimentacaoUpdateDTO;
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.entities.Produto;
 import com.example.vendasestoque.repositories.MovimentacaoEstoqueRepository;
@@ -81,14 +82,14 @@ public class MovimentacaoEstoqueService {
     }
 
     @Transactional
-    public MovimentacaoEstoque atualizarMovimentacao(Long id, MovimentacaoRequestDTO requestDTO) {
+    public MovimentacaoEstoque atualizarMovimentacao(Long id, MovimentacaoUpdateDTO updateDTO) {
         MovimentacaoEstoque movimentacaoAtual = buscarMovimentacaoPorId(id);
-        modificarMovimentacao(movimentacaoAtual, requestDTO);
+        modificarMovimentacao(movimentacaoAtual, updateDTO);
         return movimentacaoEstoqueRepository.save(movimentacaoAtual);
     }
 
-    private void modificarMovimentacao(MovimentacaoEstoque movimentacaoAtual, MovimentacaoRequestDTO requestDTO) {
-        movimentacaoAtual.setMotivo(requestDTO.motivo());
+    private void modificarMovimentacao(MovimentacaoEstoque movimentacaoAtual, MovimentacaoUpdateDTO updateDTO) {
+        movimentacaoAtual.setMotivo(updateDTO.motivo());
     }
 
     private void inserirEstoque(Produto produto, Integer quantidade) {

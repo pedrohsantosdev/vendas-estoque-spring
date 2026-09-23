@@ -2,6 +2,7 @@ package com.example.vendasestoque.resources;
 
 import com.example.vendasestoque.dtos.MovimentacaoRequestDTO;
 import com.example.vendasestoque.dtos.MovimentacaoResponseDTO;
+import com.example.vendasestoque.dtos.MovimentacaoUpdateDTO;
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.services.MovimentacaoEstoqueService;
 import jakarta.validation.Valid;
@@ -50,8 +51,8 @@ public class MovimentacaoEstoqueResource {
    }
 
    @PatchMapping(value = "/{id}")
-   public ResponseEntity<MovimentacaoResponseDTO> atualizarMovimentacao(@PathVariable Long id, @Valid @RequestBody MovimentacaoRequestDTO requestDTO) {
-       MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueService.atualizarMovimentacao(id, requestDTO);
+   public ResponseEntity<MovimentacaoResponseDTO> atualizarMovimentacao(@PathVariable Long id, @Valid @RequestBody MovimentacaoUpdateDTO updateDTO) {
+       MovimentacaoEstoque movimentacaoEstoque = movimentacaoEstoqueService.atualizarMovimentacao(id, updateDTO);
        return ResponseEntity.ok().body(new MovimentacaoResponseDTO(movimentacaoEstoque));
    }
 }
