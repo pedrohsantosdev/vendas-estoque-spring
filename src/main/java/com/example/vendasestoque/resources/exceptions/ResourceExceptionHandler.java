@@ -1,6 +1,7 @@
 package com.example.vendasestoque.resources.exceptions;
 
 import com.example.vendasestoque.services.exceptions.EstoqueInsuficiente;
+import com.example.vendasestoque.services.exceptions.ItemRepetidoNaCompra;
 import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -44,6 +45,19 @@ public class ResourceExceptionHandler {
     public ResponseEntity<StandardError> entradaInvalida(MethodArgumentNotValidException e, HttpServletRequest request) {
 
         String error = "Entrada inválida";
+        HttpStatus status = HttpStatus.BAD_REQUEST;
+
+        StandardError err = new StandardError(
+                Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI()
+        );
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(ItemRepetidoNaCompra.class)
+    public ResponseEntity<StandardError> itemRepetidoNaCompra(ItemRepetidoNaCompra e, HttpServletRequest request) {
+
+        String error = "Produtos inválidos";
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
         StandardError err = new StandardError(

@@ -1,5 +1,6 @@
 package com.example.vendasestoque.services;
 
+import com.example.vendasestoque.dtos.ItemVendaRequestDTO;
 import com.example.vendasestoque.dtos.VendaRequestDTO;
 import com.example.vendasestoque.entities.*;
 import com.example.vendasestoque.entities.PK.ItemVendaPK;
@@ -7,13 +8,16 @@ import com.example.vendasestoque.entities.enuns.StatusVenda;
 import com.example.vendasestoque.entities.enuns.TipoMovimentacao;
 import com.example.vendasestoque.repositories.ItemVendaRepository;
 import com.example.vendasestoque.repositories.VendaRepository;
+import com.example.vendasestoque.services.exceptions.ItemRepetidoNaCompra;
 import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class VendaService {
@@ -45,23 +49,35 @@ public class VendaService {
     public Venda cadastrarVenda(VendaRequestDTO requestDTO) {
 
         Cliente cliente = clienteService.buscarClientePorId(requestDTO.clienteId());
-        Produto produto = produtoService.buscarProdutoPorId(requestDTO.produtoId());
 
         Venda venda = new Venda(null, Instant.now(), StatusVenda.CONFIRMADA, cliente);
 
         venda = vendaRepository.save(venda);
 
-        ItemVenda itemVenda = new ItemVenda(new ItemVendaPK(venda, produto), requestDTO.quantidade(), produto.getPreco());
+        Set<Long> produtosEncontrados = new HashSet<>();
 
-        itemVendaRepository.save(itemVenda);
-        venda.getItens().add(itemVenda);
+        for(ItemVendaRequestDTO itemVenda : requestDTO.itens()) {
 
-        MovimentacaoEstoque movimentacaoEstoque = new MovimentacaoEstoque(
-                null, TipoMovimentacao.SAIDA, requestDTO.quantidade(), venda.getMomento(),
-                "Venda de " + produto.getNome(), produto, venda
-        );
+            boolean produtoAdicionado = produtosEncontrados.add(itemVenda.produtoId());
 
-        movimentacaoEstoqueService.cadastrarMovimentacao(movimentacaoEstoque);
+            if(!produtoAdicionado) {
+                throw new ItemRepetidoNaCompra("Item repetido na compra, verifique!");
+            }
+
+            Produto produto = produtoService.buscarProdutoPorId(itemVenda.produtoId());
+            Integer quantidade = itemVenda.quantidade();
+
+            ItemVenda item = new ItemVenda(new ItemVendaPK(venda, produto), quantidade, produto.getPreco());
+
+            item = itemVendaRepository.save(item);
+
+            venda.getItens().add(item);
+
+            MovimentacaoEstoque movimentacaoEstoque = new MovimentacaoEstoque(null, TipoMovimentacao.SAIDA, itemVenda.quantidade(), venda.getMomento(),
+                    "Venda do produto " + produto.getNome(), produto, venda);
+
+            movimentacaoEstoqueService.cadastrarMovimentacao(movimentacaoEstoque);
+        }
 
         return venda;
     }

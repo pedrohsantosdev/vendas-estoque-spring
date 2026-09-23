@@ -1,7 +1,10 @@
 package com.example.vendasestoque.dtos;
 
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
+import java.util.List;
 
 public record VendaRequestDTO(
 
@@ -9,12 +12,7 @@ public record VendaRequestDTO(
         @Positive(message = "Campo negativo não é válido")
         Long clienteId,
 
-        @NotNull(message = "Campo obrigatório")
-        @Positive(message = "Campo negativo não é válido")
-        Long produtoId,
-
-        @NotNull(message = "Campo obrigatório")
-        @Positive(message = "Campo negativo não é válido")
-        Integer quantidade
+        @NotEmpty(message = "Lista não pode ser vazia")
+        List<ItemVendaRequestDTO> itens
 ) {
 }
