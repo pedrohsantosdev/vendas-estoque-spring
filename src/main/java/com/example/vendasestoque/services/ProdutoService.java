@@ -59,9 +59,18 @@ public class ProdutoService {
 
     @Transactional
     public Produto atualizarProduto(Long id, ProdutoRequestDTO requestDTO) {
+
         Produto produtoAtual = buscarProdutoPorId(id);
-        modificarProduto(produtoAtual, requestDTO);
-        return produtoRepository.save(produtoAtual);
+
+        Produto produtoBuscado = produtoRepository.findByCodigo(requestDTO.codigo());
+
+        if(produtoBuscado == null || produtoBuscado.getId().equals(produtoAtual.getId())) {
+            modificarProduto(produtoAtual, requestDTO);
+            return produtoRepository.save(produtoAtual);
+        }
+
+        throw new CodigoExistente("Código já cadastrado em outro produto");
+
     }
 
     @Transactional
