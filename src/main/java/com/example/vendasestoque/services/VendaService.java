@@ -84,6 +84,7 @@ public class VendaService {
 
     @Transactional
     public Venda cancelarVenda(Long id) {
+
         Venda obj = buscarVendaPorId(id);
 
         if(obj.getStatusVenda() == StatusVenda.CANCELADA) {
