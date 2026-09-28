@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.time.Instant;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class ResourceExceptionHandler {
@@ -48,8 +49,14 @@ public class ResourceExceptionHandler {
         String error = "Entrada inválida";
         HttpStatus status = HttpStatus.BAD_REQUEST;
 
+        String mensagem = e.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .map(erro -> erro.getField() + ": " + erro.getDefaultMessage())
+                .collect(Collectors.joining("; "));
+
         StandardError err = new StandardError(
-                Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI()
+                Instant.now(), status.value(), error, mensagem, request.getRequestURI()
         );
 
         return ResponseEntity.status(status).body(err);

@@ -1,4 +1,4 @@
-package com.example.vendaestoque.services;
+package com.example.vendasestoque.services;
 
 import com.example.vendasestoque.entities.MovimentacaoEstoque;
 import com.example.vendasestoque.entities.Produto;

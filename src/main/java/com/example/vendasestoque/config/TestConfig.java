@@ -9,12 +9,14 @@ import com.example.vendasestoque.services.MovimentacaoEstoqueService;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 
 @Configuration
+@Profile("!test")
 public class TestConfig implements CommandLineRunner {
 
     private final ClienteRepository clienteRepository;

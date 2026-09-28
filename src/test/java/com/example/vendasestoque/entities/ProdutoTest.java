@@ -1,4 +1,4 @@
-package com.example.vendaestoque.entities;
+package com.example.vendasestoque.entities;
 
 import com.example.vendasestoque.entities.ItemVenda;
 import com.example.vendasestoque.entities.PK.ItemVendaPK;
