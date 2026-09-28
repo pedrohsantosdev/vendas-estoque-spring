@@ -20,12 +20,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(VendaResource.class)
@@ -39,7 +39,7 @@ public class VendaResourceTest {
     private VendaService vendaService;
 
     @Test
-    void deveRetornar400quandoClienteIdNaoForInformado() throws Exception{
+    void deveRetornar400quandoClienteIdNaoForInformado() throws Exception {
 
         //Preparar
         String json = """
@@ -63,7 +63,7 @@ public class VendaResourceTest {
     }
 
     @Test
-    void deveRetornar400paraQuantidadeDeItens0() throws Exception{
+    void deveRetornar400paraQuantidadeDeItens0() throws Exception {
 
         //Preparar
         String json = """
@@ -80,15 +80,15 @@ public class VendaResourceTest {
 
         //Executar e verificar
         mockMvc.perform(post("/vendas")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isBadRequest());
 
         verify(vendaService, never()).cadastrarVenda(any(VendaRequestDTO.class));
     }
 
     @Test
-    void deveCadastrarVendaRetornando201() throws Exception{
+    void deveCadastrarVendaRetornando201() throws Exception {
 
         //Preparar
         Cliente c1 = new Cliente(
@@ -132,7 +132,7 @@ public class VendaResourceTest {
                         .content(json))
                 .andExpect(status().isCreated())
                 .andExpect(header().string(
-                "Location", "http://localhost/vendas/10"))
+                        "Location", "http://localhost/vendas/10"))
                 .andExpect(jsonPath("$.id").value(10));
 
         ArgumentCaptor<VendaRequestDTO> captor = ArgumentCaptor.forClass(VendaRequestDTO.class);
@@ -146,7 +146,7 @@ public class VendaResourceTest {
     }
 
     @Test
-    void deveRetornar404QuandoClienteNaoExistir() throws Exception{
+    void deveRetornar404QuandoClienteNaoExistir() throws Exception {
 
         //Preparar
         String json = """
@@ -175,7 +175,7 @@ public class VendaResourceTest {
     }
 
     @Test
-    void deveCancelarVendaRetornando200() throws Exception{
+    void deveCancelarVendaRetornando200() throws Exception {
 
         //Preparar
         Cliente c1 = new Cliente(
@@ -202,11 +202,12 @@ public class VendaResourceTest {
     }
 
     @Test
-    void deveRetornar404aoCancelarVendaInexistente() throws Exception{
+    void deveRetornar404aoCancelarVendaInexistente() throws Exception {
 
         //Preparar
         when(vendaService.cancelarVenda(99L)).thenThrow(new ResourceNotFoundException(99L));
 
+        //Executar e Verificar
         mockMvc.perform(patch("/vendas/{id}", 99L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Recurso não encontrado"))
@@ -216,8 +217,9 @@ public class VendaResourceTest {
     }
 
     @Test
-    void deveRetornar400QuandoAlistaDeItensForVazia() throws Exception{
+    void deveRetornar400QuandoAlistaDeItensForVazia() throws Exception {
 
+        //Preparar
         String json = """
                 {
                   "clienteId": 1,
@@ -225,11 +227,164 @@ public class VendaResourceTest {
                 }
                 """;
 
+        //Executar e Verificar
         mockMvc.perform(post("/vendas")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isBadRequest());
 
         verify(vendaService, never()).cadastrarVenda(any(VendaRequestDTO.class));
+
     }
+
+    @Test
+    void deveRetornar200paraUmVendaComIdExistente() throws Exception {
+
+        //Preparar
+        Cliente c1 = new Cliente(
+                10L, "Maria Silva",
+                "maria@example.com", "11987654321"
+        );
+
+        Venda v1 = new Venda(
+                10L,
+                Instant.now(),
+                StatusVenda.CONFIRMADA,
+                c1
+        );
+
+        when(vendaService.buscarVendaPorId(10L)).thenReturn(v1);
+
+        //Executar e Verificar
+        mockMvc.perform(get("/vendas/{id}", 10L))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(10))
+                .andExpect(jsonPath("$.statusVenda").value("CONFIRMADA"));
+
+        verify(vendaService).buscarVendaPorId(10L);
+
+    }
+
+    @Test
+    void deveRetorna404quandoBuscarUmaVendaInexistente() throws Exception {
+
+        //Preparar
+        when(vendaService.buscarVendaPorId(99L)).thenThrow(new ResourceNotFoundException(99L));
+
+        //Executar e Verificar
+        mockMvc.perform(get("/vendas/{id}", 99L))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Recurso não encontrado"))
+                .andExpect(jsonPath("$.caminho").value("/vendas/99"));
+
+        verify(vendaService).buscarVendaPorId(99L);
+    }
+
+    @Test
+    void deveRetornar200comUmaListaVaziaQuandoNaoExistirVendasCadastradas() throws Exception {
+
+        //Preparar
+        when(vendaService.listarVendas()).thenReturn(List.of());
+
+        //Executar e Verificar
+        mockMvc.perform(get("/vendas"))
+                .andExpect(status().isOk())
+                .andExpect(content().json("[]"));
+
+        verify(vendaService).listarVendas();
+    }
+
+    @Test
+    void deveRetornar200comUmaListaDeVendas() throws Exception {
+
+        //Preparar
+        Cliente c1 = new Cliente(
+                null, "Maria Silva",
+                "maria@example.com", "11987654321"
+        );
+
+        Venda v1 = new Venda(
+                1L,
+                Instant.parse("2026-09-21T13:00:00Z"),
+                StatusVenda.CONFIRMADA,
+                c1
+        );
+
+        Venda v2 = new Venda(
+                2L,
+                Instant.parse("2026-09-21T14:00:00Z"),
+                StatusVenda.CANCELADA,
+                c1
+        );
+
+        when(vendaService.listarVendas()).thenReturn(List.of(v1, v2));
+
+        //Executar e Verificar
+        mockMvc.perform(get("/vendas"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].statusVenda").value("CONFIRMADA"));
+    }
+
+    @Test
+    void deveRetornar400QuandoIdDaVendaNaoForNumerico() throws Exception {
+
+        //Executar e Verificar
+        mockMvc.perform(get("/vendas/abc"))
+                .andExpect(status().isBadRequest());
+
+        verify(vendaService, never()).buscarVendaPorId(anyLong());
+    }
+
+    @Test
+    void deveRetornar400QuandoListaForNula() throws Exception {
+
+        //Preparar
+        String json = """
+                {
+                    "clienteId" : 1,
+                    "itens" : [null]
+                }
+                """;
+
+        //Executar e Verificar
+        mockMvc.perform(post("/vendas")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+
+        verify(vendaService, never()).cadastrarVenda(any(VendaRequestDTO.class));
+
+    }
+
+    @Test
+    void deveRetornar204aoDeletarVenda() throws Exception{
+
+        //Executar e Verificar
+        mockMvc.perform(delete("/vendas/{id}", 10))
+                .andExpect(status().isNoContent())
+                .andExpect(content().string(""));
+
+        verify(vendaService).deletarVenda(10L);
+    }
+
+    @Test
+    void deveRetornar404aoDeletarVendaInexistente() throws Exception{
+
+        //Preparar
+        doThrow(new ResourceNotFoundException(99L)).when(vendaService).deletarVenda(99L);
+
+        //Executar e Verificar
+        mockMvc.perform(delete("/vendas/{id}", 99))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("Recurso não encontrado"))
+                .andExpect(jsonPath("$.caminho").value("/vendas/99"));
+
+        verify(vendaService).deletarVenda(99L);
+
+    }
+
+    
+
 }

@@ -15,6 +15,6 @@ public record VendaRequestDTO(
 
         @NotEmpty(message = "Lista não pode ser vazia")
         @Valid
-        List<ItemVendaRequestDTO> itens
+        List<@NotNull(message = "Itens da lista não podem ser nulos") ItemVendaRequestDTO> itens
 ) {
 }
