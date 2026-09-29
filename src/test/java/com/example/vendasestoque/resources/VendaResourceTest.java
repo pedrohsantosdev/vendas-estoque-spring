@@ -385,6 +385,6 @@ public class VendaResourceTest {
 
     }
 
-    
+
 
 }
