@@ -68,7 +68,7 @@ public class VendaResourceTest {
         //Preparar
         String json = """
                 {
-                                 "clienteId: 1,   
+                                 "clienteId": 1,   
                                  "itens": [
                                      {
                                          "produtoId": 1,

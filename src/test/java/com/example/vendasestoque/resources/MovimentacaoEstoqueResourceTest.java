@@ -683,7 +683,9 @@ public class MovimentacaoEstoqueResourceTest {
 
         //Preparar
         String json = """
+                {
                 "motivo" : null
+                }
                 """;
 
         //Executar e Verificar
@@ -701,7 +703,9 @@ public class MovimentacaoEstoqueResourceTest {
 
         //Preparar
         String json = """
+               {
                 "motivo" : ""
+               }
                 """;
 
         //Executar e Verificar
@@ -719,7 +723,9 @@ public class MovimentacaoEstoqueResourceTest {
 
         //Preparar
         String json = """
+                {
                 "motivo" : "  "
+                }
                 """;
 
         //Executar e Verificar

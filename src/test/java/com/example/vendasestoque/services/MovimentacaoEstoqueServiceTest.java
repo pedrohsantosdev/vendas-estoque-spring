@@ -222,12 +222,13 @@ public class MovimentacaoEstoqueServiceTest {
     @Test
     void deveValidarSaidaUsandoEstoqueDoProdutoBuscado() {
 
-        //Preparar
+        // Preparar: produto recebido informa estoque de 100.
         Produto produtoRecebido = new Produto(
-                1L, "Mouse", "PRD-001",
-                new BigDecimal("49.90"), 100, 2
+                1L, "Teclado Magnético", "PRD-001",
+                new BigDecimal("259.90"), 100, 2
         );
 
+        // A consulta retorna o mesmo ID, mas com estoque de apenas 5.
         Produto produtoBuscado = new Produto(
                 1L, "Teclado Magnético", "PRD-001",
                 new BigDecimal("259.90"), 5, 2
@@ -239,22 +240,25 @@ public class MovimentacaoEstoqueServiceTest {
                 6,
                 Instant.now(),
                 "Saída para teste",
-                produtoBuscado,
+                produtoRecebido,
                 null
         );
 
-        when(produtoService.buscarProdutoPorId(1L)).thenReturn(produtoBuscado);
+        when(produtoService.buscarProdutoPorId(1L))
+                .thenReturn(produtoBuscado);
 
-        //Executar e Verificar
-
+        // Executar e verificar: o estoque consultado não permite retirar 6.
         assertThrows(
                 EstoqueInsuficiente.class,
                 () -> movimentacaoEstoqueService.cadastrarMovimentacao(saida)
         );
 
         assertEquals(5, produtoBuscado.getQuantidadeEstoque());
-        verify(movimentacaoEstoqueRepository, never()).save(any());
+        assertEquals(100, produtoRecebido.getQuantidadeEstoque());
 
+        verify(produtoService).buscarProdutoPorId(1L);
+        verify(movimentacaoEstoqueRepository, never())
+                .save(any(MovimentacaoEstoque.class));
     }
 
     @Test
