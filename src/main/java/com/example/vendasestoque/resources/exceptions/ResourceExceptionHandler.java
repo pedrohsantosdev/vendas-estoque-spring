@@ -1,10 +1,8 @@
 package com.example.vendasestoque.resources.exceptions;
 
-import com.example.vendasestoque.services.exceptions.CodigoExistente;
-import com.example.vendasestoque.services.exceptions.EstoqueInsuficiente;
-import com.example.vendasestoque.services.exceptions.ItemRepetidoNaCompra;
-import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
+import com.example.vendasestoque.services.exceptions.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -79,6 +77,19 @@ public class ResourceExceptionHandler {
     public ResponseEntity<StandardError> codigoExistente(CodigoExistente e, HttpServletRequest request) {
 
         String error = "Código inválido";
+        HttpStatus status = HttpStatus.CONFLICT;
+
+        StandardError err = new StandardError(
+                Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI()
+        );
+
+        return ResponseEntity.status(status).body(err);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<StandardError> integridadeViolada(DataIntegrityViolationException e, HttpServletRequest request) {
+
+        String error = "Item associado a outro, impossível deletar";
         HttpStatus status = HttpStatus.CONFLICT;
 
         StandardError err = new StandardError(
