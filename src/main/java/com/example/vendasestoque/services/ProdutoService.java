@@ -36,7 +36,7 @@ public class ProdutoService {
             throw new ResourceNotFoundException(codigo);
         }
 
-        return produtoRepository.findByCodigo(codigo);
+        return obj;
     }
 
     public List<Produto> buscarProdutosComEstoqueBaixo() {

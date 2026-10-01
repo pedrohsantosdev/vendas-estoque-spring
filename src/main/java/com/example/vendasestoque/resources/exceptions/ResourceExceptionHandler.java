@@ -93,7 +93,8 @@ public class ResourceExceptionHandler {
         HttpStatus status = HttpStatus.CONFLICT;
 
         StandardError err = new StandardError(
-                Instant.now(), status.value(), error, e.getMessage(), request.getRequestURI()
+                Instant.now(), status.value(), error, "Conflito no banco, não é possível deletar um item que possui associações",
+                request.getRequestURI()
         );
 
         return ResponseEntity.status(status).body(err);

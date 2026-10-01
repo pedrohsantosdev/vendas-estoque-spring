@@ -10,6 +10,7 @@ import com.example.vendasestoque.entities.enuns.StatusVenda;
 import com.example.vendasestoque.services.VendaService;
 import com.example.vendasestoque.services.exceptions.ResourceNotFoundException;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -385,6 +386,20 @@ public class VendaResourceTest {
 
     }
 
+    @Test
+    void deveRetornar409aoDeletarVendaComAssociacaoNoBanco() throws Exception {
 
+        //Preparar
+        doThrow(new DataIntegrityViolationException("Item associado a outro, impossível deletar")).when(vendaService).deletarVenda(99L);
+
+        //Executar e Verificar
+        mockMvc.perform(delete("/vendas/{id}", 99L))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Item associado a outro, impossível deletar"))
+                .andExpect(jsonPath("$.caminho").value("/vendas/99"));
+
+        verify(vendaService).deletarVenda(99L);
+
+    }
 
 }

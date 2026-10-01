@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -616,5 +617,22 @@ public class ClienteResourceTest {
                 .andExpect(jsonPath("$.caminho").value("/clientes/99"));
 
         verify(clienteService).deletarCliente(99L);
+    }
+
+    @Test
+    void deveRetornar409aoExcluirUmClienteQuePossuiAssociacaoNoBanco() throws Exception{
+
+        //Preparar
+        doThrow(new DataIntegrityViolationException("Item associado a outro, impossível deletar"))
+                .when(clienteService).deletarCliente(99L);
+
+        //Executar e Verificar
+        mockMvc.perform(delete("/clientes/{id}", 99L))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Item associado a outro, impossível deletar"))
+                .andExpect(jsonPath("$.caminho").value("/clientes/99"));
+
+        verify(clienteService).deletarCliente(99L);
+
     }
 }

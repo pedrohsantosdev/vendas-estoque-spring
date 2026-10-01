@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -405,6 +406,53 @@ public class ProdutoResourceTest {
     }
 
     @Test
+    void deveRetornar400aoCadastrarProdutoComPreco0() throws Exception {
+
+        //Preparar
+        String json = """
+                {
+                "nome" : "Teclado",
+                "codigo" : "PRD-003",
+                "preco" : 0,
+                "estoqueMinimo" : 5
+                }
+                """;
+
+        //Executar e Verificar
+        mockMvc.perform(post("/produtos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isBadRequest());
+
+        verify(produtoService, never()).cadastrarProduto(any(ProdutoRequestDTO.class));
+
+    }
+
+    @Test
+    void deveRetornar400aoCadastrarProdutoComPrecoNegativo() throws Exception {
+
+        //Preparar
+        String json =
+                """
+                {
+                "nome" : "Teclado",
+                "codigo" : "PRD-003,
+                "preco" : -3,
+                "estoqueMinimo" : 5
+                }
+                """;
+
+        //Executar e Verificar
+        mockMvc.perform(post("/produtos")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(json))
+                .andExpect(status().isBadRequest());
+
+        verify(produtoService, never()).cadastrarProduto(any(ProdutoRequestDTO.class));
+
+    }
+
+    @Test
     void deveRetornar200aoAtualizarProdutoComDadosValidos() throws Exception {
 
         //Preparar
@@ -423,8 +471,8 @@ public class ProdutoResourceTest {
 
         //Executar e Verificar
         mockMvc.perform(put("/produtos/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1));
 
@@ -485,8 +533,8 @@ public class ProdutoResourceTest {
 
         //Executar e Verificar
         mockMvc.perform(put("/produtos/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error").value("Código inválido"));
 
@@ -509,8 +557,8 @@ public class ProdutoResourceTest {
 
         //Executar e Verificar
         mockMvc.perform(put("/produtos/{id}", 1L)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(json))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
                 .andExpect(status().isBadRequest());
 
         verify(produtoService, never()).atualizarProduto(eq(1L), any(ProdutoRequestDTO.class));
@@ -539,6 +587,23 @@ public class ProdutoResourceTest {
         mockMvc.perform(delete("/produtos/{id}", 99L))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Recurso não encontrado"))
+                .andExpect(jsonPath("$.caminho").value("/produtos/99"));
+
+        verify(produtoService).deletarProduto(99L);
+
+    }
+
+    @Test
+    void deveRetornar409aoExcluirProdutoComAssociacaoNoBanco() throws Exception {
+
+        //Preparar
+        doThrow(new DataIntegrityViolationException("Item associado a outro, impossível deletar"))
+                .when(produtoService).deletarProduto(99L);
+
+        //Executar e Verificar
+        mockMvc.perform(delete("/produtos/{id}", 99L))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.error").value("Item associado a outro, impossível deletar"))
                 .andExpect(jsonPath("$.caminho").value("/produtos/99"));
 
         verify(produtoService).deletarProduto(99L);
