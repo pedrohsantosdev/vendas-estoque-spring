@@ -339,7 +339,7 @@ public class ProdutoResourceTest {
         String json = """
                 {
                 "nome" : "Teclado",
-                "codigo" : "PRD-003"',
+                "codigo" : "PRD-003",
                 "preco" : "",
                 "estoqueMinimo" : 5
                 }
