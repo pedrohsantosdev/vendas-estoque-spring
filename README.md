@@ -1,4 +1,4 @@
-Vendas & Estoque API
+# Vendas & Estoque API
 
 API REST para cadastro de clientes e produtos, registro de vendas e controle de movimentações de estoque.
 
