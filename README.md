@@ -1,8 +1,8 @@
-# Vendas & Estoque API
+Vendas & Estoque API
 
 API REST para cadastro de clientes e produtos, registro de vendas e controle de movimentações de estoque.
 
-Projeto pessoal desenvolvido para praticar Java e Spring Boot, com foco em regras de negócio, persistência relacional, validação de requisições e testes automatizados.
+Projeto pessoal de backend com Java e Spring Boot, desenvolvido para aplicar regras de negócio, transações, persistência relacional e testes automatizados. A aplicação e o MySQL podem ser executados juntos com Docker Compose.
 
 ## Funcionalidades
 
@@ -30,7 +30,7 @@ Projeto pessoal desenvolvido para praticar Java e Spring Boot, com foco em regra
 | JUnit e Mockito | Testes e simulação de dependências |
 | MockMvc | Testes dos endpoints |
 | Testcontainers | MySQL isolado nos testes de integração |
-| Docker Compose | MySQL para desenvolvimento local |
+| Docker e Docker Compose | Construção da imagem e execução da API com MySQL |
 
 O Docker Compose utiliza MySQL `8.4.7`. Os testes com Testcontainers utilizam MySQL `8.0.36`.
 
@@ -63,17 +63,16 @@ O Docker Compose utiliza MySQL `8.4.7`. Os testes com Testcontainers utilizam My
 - Cancelar novamente uma venda já cancelada não gera novas devoluções.
 - Exclusões impedidas por vínculos entre registros retornam HTTP `409 Conflict`.
 
-## Como executar
+## Executar com Docker
 
 Os comandos abaixo são para PowerShell, executados na raiz do repositório.
 
 ### Requisitos
 
-- JDK 25 configurado no ambiente.
-- Docker Desktop em execução, com suporte a containers Linux.
+- Docker Desktop em execução, com suporte a contêineres Linux e Docker Compose.
 - Git, caso utilize a clonagem abaixo.
 
-O projeto inclui o Maven Wrapper.
+Para executar a API pelo Docker, o Java e o Maven são fornecidos pelas imagens utilizadas no build. O JDK 25 no computador é necessário para executar os testes pelo Maven Wrapper.
 
 ### 1. Obter o projeto
 
@@ -82,63 +81,126 @@ git clone https://github.com/pedrohsantosdev/vendas-estoque-spring.git
 cd vendas-estoque-spring
 ```
 
-### 2. Configurar o ambiente
+### 2. Configurar as senhas
 
-Na primeira configuração, copie o arquivo de exemplo:
+Na primeira configuração, copie o arquivo de exemplo. Se já possuir um `.env`, mantenha seus valores:
 
 ```powershell
 Copy-Item .env.example .env
 ```
 
-Edite o arquivo `.env` e defina os valores:
+No Linux ou macOS, o comando equivalente é `cp .env.example .env`.
 
-```properties
+Edite o `.env` e substitua os valores abaixo por duas senhas de sua escolha:
+
+```dotenv
 MYSQL_PASSWORD=defina_uma_senha_local
 MYSQL_ROOT_PASSWORD=defina_outra_senha_para_root
 ```
 
-O arquivo `.env` está incluído no `.gitignore`. O projeto importa suas propriedades por meio de `spring.config.import`.
+`MYSQL_PASSWORD` é a senha do usuário utilizado pela aplicação. `MYSQL_ROOT_PASSWORD` é a senha do administrador do MySQL e é passada somente ao serviço do banco.
 
-A configuração de desenvolvimento utiliza:
+O Compose lê o `.env` e fornece as variáveis aos contêineres. O `.gitignore` exclui esse arquivo do versionamento, e o `.dockerignore` o exclui do contexto de construção da imagem. Mantenha apenas valores de exemplo no `.env.example`.
 
-| Configuração | Valor |
+### 3. Iniciar a API e o MySQL
+
+```powershell
+docker compose up -d --build
+```
+
+O comando constrói a imagem da aplicação e inicia os serviços `db` e `backend`. Na primeira execução, o download das imagens e das dependências pode levar alguns minutos.
+
+O MySQL possui uma verificação de saúde, e o Compose aguarda o banco ficar disponível antes de iniciar o backend. O Spring Boot ainda precisa concluir sua inicialização antes de receber requisições.
+
+Confira o estado dos serviços:
+
+```powershell
+docker compose ps
+```
+
+O serviço `db` deve aparecer como `healthy`, e o `backend` deve permanecer em execução.
+
+### 4. Testar a API
+
+Endereço base: **[http://localhost:8081](http://localhost:8081)**.
+
+No Postman, envie:
+
+```http
+GET http://localhost:8081/produtos
+```
+
+Ou consulte pelo PowerShell:
+
+```powershell
+Invoke-RestMethod -Uri http://localhost:8081/produtos
+```
+
+A resposta esperada é `200 OK`, com uma lista de produtos. A rota `/` não possui uma página inicial; utilize os endpoints documentados neste README.
+
+### Conexão entre os serviços
+
+| Configuração | Valor no Docker Compose |
 |---|---|
-| Host | `localhost`, ou o valor de `MYSQL_HOST` |
-| Porta do MySQL | `3306` |
-| Banco | `mydatabase` |
-| Usuário da aplicação | `myuser` |
-| Senha da aplicação | Valor de `MYSQL_PASSWORD` |
+| Serviço da aplicação | `backend` |
+| API no computador | `http://localhost:8081` |
+| Porta da aplicação dentro do contêiner | `8080` |
+| Serviço e host do banco na rede do Compose | `db` |
+| Porta interna do MySQL | `3306` |
+| Banco | `controle_vendas_estoque` |
+| Usuário da aplicação | `dev_pedro` |
+| Senha da aplicação | Valor de `MYSQL_PASSWORD` no `.env` |
 
-### 3. Iniciar o MySQL
+O Compose fornece `SPRING_DATASOURCE_URL`, `SPRING_DATASOURCE_USERNAME` e `SPRING_DATASOURCE_PASSWORD` ao backend. Essas variáveis substituem a configuração de conexão padrão do `application.properties`.
 
-```powershell
-docker compose up -d
-docker compose logs -f mysql
-```
+O MySQL fica acessível pela rede interna do Compose; sua porta não é publicada no computador. A API é publicada apenas no endereço local `127.0.0.1:8081`.
 
-Aguarde o MySQL informar que está pronto para receber conexões. Use `Ctrl+C` para sair da visualização dos logs; o container continuará em execução.
+### Logs, reinicialização e persistência
 
-O Compose publica a porta `3306`. Se já existir outro MySQL nessa porta, resolva o conflito antes de iniciar o container.
-
-### 4. Iniciar a aplicação
+Para acompanhar os logs da aplicação:
 
 ```powershell
-.\mvnw.cmd spring-boot:run
+docker compose logs -f backend
 ```
 
-A API fica disponível em `http://localhost:8080`. Uma consulta inicial pode ser feita em [GET /produtos](http://localhost:8080/produtos).
+Para consultar as últimas mensagens do banco:
 
-Para interromper a aplicação, use `Ctrl+C`. Para parar o banco de desenvolvimento:
+```powershell
+docker compose logs --tail 100 db
+```
+
+`Ctrl+C` encerra o acompanhamento dos logs, mantendo os serviços em execução.
+
+Para parar os serviços:
 
 ```powershell
 docker compose stop
 ```
 
+Para iniciá-los novamente, respeitando a dependência entre aplicação e banco:
+
+```powershell
+docker compose up -d
+```
+
+Após alterar o código Java, reconstrua a imagem com `docker compose up -d --build`.
+
+Os dados do MySQL são armazenados no volume `db-data`. Eles são preservados ao parar ou recriar os contêineres. As senhas e o usuário informados ao MySQL são definidos na primeira inicialização do volume; editar o `.env` depois disso não altera automaticamente as credenciais já gravadas no banco.
+
+### Como a imagem é construída
+
+O Dockerfile utiliza duas etapas:
+
+1. `maven:3.10.0-eclipse-temurin-25-alpine` compila o projeto e gera o JAR.
+2. `eclipse-temurin:25-jre-alpine` recebe o JAR e executa a aplicação.
+
+A pasta `target/` é gerada dentro da etapa de construção. Não é necessário gerá-la previamente no computador.
+
+O build utiliza `-DskipTests`: os testes são compilados, mas não executados durante a criação da imagem. Os testes com Testcontainers devem ser executados separadamente, em um ambiente com acesso ao Docker, conforme a seção [Testes](#testes).
+
 ### Dados iniciais
 
 Fora do perfil `test`, a classe `TestConfig` cria clientes, produtos, vendas e itens demonstrativos quando as quatro tabelas correspondentes estão vazias.
-
-A configuração atual também exige que exista o produto de código `PRD-001`. Se o banco já contiver dados, mas esse produto não existir, a inicialização será interrompida com uma mensagem indicando essa necessidade.
 
 Os registros demonstrativos são inseridos diretamente pelos repositórios. Para experimentar o fluxo completo de venda e movimentação de estoque, utilize os endpoints abaixo.
 
@@ -296,7 +358,7 @@ As exceções tratadas pelo `ResourceExceptionHandler` utilizam a estrutura abai
 
 ## Testes
 
-Com o Docker Desktop em execução, rode a suíte:
+Com o **JDK 25 configurado** e o **Docker Desktop em execução**, rode a suíte na raiz do projeto. O Maven Wrapper está incluído no repositório:
 
 ```powershell
 .\mvnw.cmd test
@@ -308,7 +370,9 @@ Para executar somente uma classe:
 .\mvnw.cmd "-Dtest=ProdutoRepositoryIntegrationTest" test
 ```
 
-Os testes de integração criam seus próprios containers MySQL. Não é necessário iniciar o banco do Compose para executar esses testes.
+No Linux ou macOS, utilize `./mvnw test` (conceda permissão de execução ao script com `chmod +x mvnw`, se necessário).
+
+Os testes de integração criam seus próprios contêineres MySQL. Não é necessário iniciar o banco do Compose para executar esses testes.
 
 | Tipo | Ferramentas | Exemplos de cenários |
 |---|---|---|
@@ -344,6 +408,8 @@ Os relatórios da execução pelo Maven ficam em `target/surefire-reports`.
 
 ## Autor
 
-Desenvolvido por [Pedro](https://github.com/pedrohsantosdev) como projeto pessoal de estudos em desenvolvimento backend com Java.
+Desenvolvido por [Pedro Henrique](https://github.com/pedrohsantosdev) como projeto pessoal de estudos em desenvolvimento backend com Java.
+
+[LinkedIn](https://www.linkedin.com/in/pedrohenriquedev1/)
 
 [Repositório no GitHub](https://github.com/pedrohsantosdev/vendas-estoque-spring)
