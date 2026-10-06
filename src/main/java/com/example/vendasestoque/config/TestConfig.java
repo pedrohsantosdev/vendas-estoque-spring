@@ -105,26 +105,5 @@ public class TestConfig implements CommandLineRunner {
             itemVendaRepository.saveAll(List.of(item1, item2, item3));
         }
 
-        Produto produto = produtoRepository.findByCodigo("PRD-001");
-
-
-        if (produto == null) {
-            throw new IllegalStateException(
-                    "Cadastre o produto PRD-001 para executar este teste"
-            );
-        }
-
-
-        MovimentacaoEstoque entrada = new MovimentacaoEstoque(
-                null,
-                TipoMovimentacao.ENTRADA,
-                5,
-                Instant.now(),
-                "Reposição de estoque",
-                produto,
-                null
-        );
-
-        //movimentacaoEstoqueService.cadastrarMovimentacao(entrada);
     }
 }
